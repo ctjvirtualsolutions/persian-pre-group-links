@@ -1,0 +1,90 @@
+{
+  "settings": {
+    "showTalkTitle": true,
+    "showMap": true,
+    "showZoomDetails": true
+  },
+  "meeting": {
+    "talkTitle": "Special Bible talk",
+    "day": "Sunday",
+    "time": "10:00 AM",
+    "addressLines": [
+      "Av. General Ataliba Leonel, 3339",
+      "Parada Inglesa",
+      "São Paulo, SP",
+      "02242-001"
+    ],
+    "mapLink": "https://maps.app.goo.gl/uqKJraoMNDvK8nQ87",
+    "zoomLink": "https://bit.ly/4sjP1T1",
+    "meetingId": "89558642683",
+    "passcode": "028443"
+  },
+  "ui": {
+    "siteTitle": "Persian Pre-Group Meeting Messages",
+    "intro": "Choose a language, then copy or send the meeting invitation.",
+    "labels": {
+      "talkTitle": "Talk title",
+      "day": "Day",
+      "time": "Time",
+      "address": "Address",
+      "map": "Map",
+      "zoom": "Zoom",
+      "meetingId": "Meeting ID",
+      "passcode": "Passcode",
+      "copy": "Copy",
+      "whatsapp": "WhatsApp",
+      "sms": "SMS",
+      "email": "Email",
+      "share": "Share",
+      "copied": "Copied!",
+      "copyFailed": "Copy failed"
+    }
+  },
+  "languages": [
+    {
+      "code": "fa",
+      "name": "Persian",
+      "nativeName": "فارسی",
+      "visible": true,
+      "dir": "rtl",
+      "heading": "گردهمایی آخر هفتهٔ شاهدان یَهُوَه",
+      "message": "شما صمیمانه به گردهمایی آخر هفتهٔ شاهدان یَهُوَه دعوت هستید."
+    },
+    {
+      "code": "prs",
+      "name": "Dari",
+      "nativeName": "دری",
+      "visible": true,
+      "dir": "rtl",
+      "heading": "جلسهٔ آخر هفتهٔ شاهدان یَهُوَه",
+      "message": "شما به گرمی به جلسهٔ آخر هفتهٔ شاهدان یَهُوَه دعوت هستید."
+    },
+    {
+      "code": "en",
+      "name": "English",
+      "nativeName": "English",
+      "visible": true,
+      "dir": "ltr",
+      "heading": "Weekend Meeting of Jehovah’s Witnesses",
+      "message": "You are warmly invited to the weekend meeting of Jehovah’s Witnesses."
+    },
+    {
+      "code": "pt",
+      "name": "Portuguese",
+      "nativeName": "Português",
+      "visible": true,
+      "dir": "ltr",
+      "heading": "Reunião de fim de semana das Testemunhas de Jeová",
+      "message": "Você está cordialmente convidado para a reunião de fim de semana das Testemunhas de Jeová."
+    },
+    {
+      "code": "de",
+      "name": "German",
+      "nativeName": "Deutsch",
+      "visible": true,
+      "dir": "ltr",
+      "heading": "Wochenendzusammenkunft der Zeugen Jehovas",
+      "message": "Du bist herzlich zur Wochenendzusammenkunft der Zeugen Jehovas eingeladen."
+    }
+  ]
+}
