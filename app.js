@@ -156,6 +156,16 @@ function renderCards(content) {
     const emailButton = card.querySelector('.email-button');
     emailButton.href = `mailto:?subject=${encodeURIComponent(language.heading)}&body=${encodedMessage}`;
 
+    const shareButton = card.querySelector('.share-button');
+    shareButton.addEventListener('click', async () => {
+      if (navigator.share) {
+        await navigator.share({ title: language.heading, text: message });
+      } else {
+        await copyText(message);
+        setStatus('Copied!');
+      }
+    });
+
     elements.cards.append(card);
   });
 }

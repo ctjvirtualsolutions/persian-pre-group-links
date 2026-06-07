@@ -51,6 +51,11 @@ A simple Firebase web app for a multilingual meeting-message hub. It uses plain 
     firebase deploy
     ```
 
+
+## Updating meeting content
+
+Meeting updates are made through `admin.html`, not by editing `config.json` or running an export step. Sign in at `/admin.html` with the Firebase Authentication admin user, edit the page content, language visibility, meeting details, language-specific labels/values, and main image, then click **Save to Firestore**.
+
 ## Data model
 
 The app uses one Firestore document:
