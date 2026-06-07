@@ -1,51 +1,93 @@
 # Persian Pre-Group Meeting Messages
 
-A simple static, multilingual meeting-message hub for the Persian pre-group. It is built with plain HTML, CSS, and JavaScript, so it works well on GitHub Pages without a build step.
+A simple Firebase web app for a multilingual meeting-message hub. It uses plain HTML, CSS, and JavaScript with no framework and no build or export step.
+
+## What it uses
+
+- Firebase Hosting
+- Firebase Authentication with email/password sign-in
+- Cloud Firestore
+- Cloud Storage for Firebase
+- Plain browser JavaScript modules
 
 ## Files
 
-- `index.html` — page structure and card template.
-- `styles.css` — mobile-friendly card layout and visual styling.
-- `app.js` — loads `config.json`, renders meeting cards, and powers copy/share buttons.
-- `config.json` — editable meeting content, languages, and display options.
-- `.nojekyll` — tells GitHub Pages to serve the site as a plain static site.
+- `index.html` — public meeting-message page.
+- `app.js` — live Firestore reader for `site/current` and public card rendering.
+- `content-defaults.js` — starter document content used before the first admin save.
+- `admin.html` — password-protected admin page.
+- `admin.js` — Firebase Auth login, Firestore save, and Storage upload logic.
+- `firebase-config.js` — clearly marked Firebase web app config placeholders.
+- `styles.css` — shared public/admin styling.
+- `firestore.rules` — public read and authenticated write for `site/current`.
+- `storage.rules` — public read and authenticated image upload for the main image path.
+- `firebase.json` — Firebase Hosting, Firestore rules, and Storage rules configuration.
 
-## Updating future meetings
+## Firebase setup
 
-In most cases, you only need to edit `config.json` for future meetings.
+1. Create a Firebase project.
+2. In **Project settings → Your apps**, create a Web app.
+3. Copy the Web app config into `firebase-config.js` and replace every `YOUR_*` placeholder.
+4. In **Authentication → Sign-in method**, enable **Email/Password**.
+5. In **Authentication → Users**, create the admin user.
+6. Create a Cloud Firestore database.
+7. Create a Cloud Storage bucket.
+8. Install the Firebase CLI if needed:
 
-Use `config.json` to control:
+   ```sh
+   npm install -g firebase-tools
+   ```
 
-- visible languages
-- talk title
-- day
-- time
-- address lines
-- map link
-- Zoom link
-- meeting ID
-- passcode
-- whether the talk title shows
-- whether the map shows
-- whether Zoom details show
+9. Log in and select the project:
 
-## Language cards
+   ```sh
+   firebase login
+   firebase use --add
+   ```
 
-Each visible language in `config.json` appears as its own card. Every card includes the message text and buttons for:
+10. Deploy Hosting and rules:
 
-- Copy
-- WhatsApp
-- SMS
-- Email
-- Share
+    ```sh
+    firebase deploy
+    ```
 
-Persian and Dari are configured with right-to-left text direction.
 
-## GitHub Pages
+## Updating meeting content
 
-To publish with GitHub Pages:
+Meeting updates are made through `admin.html`, not by editing `config.json` or running an export step. Sign in at `/admin.html` with the Firebase Authentication admin user, edit the page content, language visibility, meeting details, language-specific labels/values, and main image, then click **Save to Firestore**.
 
-1. Commit these files to the repository.
-2. In GitHub, open **Settings** → **Pages**.
-3. Choose the branch and root folder for the Pages source.
-4. Save, then open the published GitHub Pages URL.
+## Data model
+
+The app uses one Firestore document:
+
+- Collection: `site`
+- Document: `current`
+
+The public page listens to this document live. The admin page writes changes directly to it.
+
+Important top-level fields include:
+
+- `title`
+- `subtitle`
+- `mainImageUrl`
+- `showTalk`
+- `showMap`
+- `showZoom`
+- `addressLines`
+- `mapLink`
+- `zoomLink`
+- `meetingId`
+- `passcode`
+- `languages`
+
+Each language entry includes `enabled`, `name`, `nativeName`, `dir`, and all language-specific labels and values used by the public cards.
+
+## First content save
+
+If `site/current` does not exist yet, the admin page loads starter content from `content-defaults.js`. Sign in at `/admin.html`, review the fields, optionally upload the main image, and click **Save to Firestore**. The public page updates live after the document is created.
+
+## Security rules
+
+`firestore.rules` allows everyone to read `site/current`, but only signed-in users can write it.
+
+`storage.rules` allows everyone to read uploaded main images under `site/current/`, but only signed-in users can upload image files there.

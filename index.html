@@ -12,42 +12,40 @@
       <div class="shell hero">
         <p class="eyebrow">Persian Pre-Group</p>
         <h1 id="site-title">Meeting Messages</h1>
-        <p id="site-intro" class="intro">Loading meeting details…</p>
+        <p id="site-subtitle" class="intro">Loading meeting details…</p>
       </div>
     </header>
 
     <main class="shell">
-      <section id="meeting-summary" class="summary-card" aria-live="polite"></section>
+      <figure id="main-image-wrap" class="main-image-wrap" hidden>
+        <img id="main-image" class="main-image" alt="">
+      </figure>
+
       <section id="language-cards" class="card-grid" aria-live="polite"></section>
       <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
     </main>
 
     <footer class="site-footer">
       <div class="shell">
-        <p>Update future meeting details in <code>config.json</code>.</p>
+        <p><a href="admin.html">Admin</a></p>
       </div>
     </footer>
 
     <template id="language-card-template">
       <article class="language-card">
-        <div class="card-heading-row">
-          <div>
-            <p class="language-name"></p>
-            <h2 class="message-heading"></h2>
-          </div>
-        </div>
-        <p class="message-text"></p>
+        <p class="language-name"></p>
+        <h2 class="message-heading"></h2>
         <dl class="message-details"></dl>
         <div class="button-row">
-          <button class="button copy-button" type="button"></button>
-          <a class="button whatsapp-button" target="_blank" rel="noopener"></a>
-          <a class="button sms-button"></a>
-          <a class="button email-button"></a>
-          <button class="button share-button" type="button"></button>
+          <button class="button copy-button" type="button">Copy</button>
+          <a class="button whatsapp-button" target="_blank" rel="noopener">WhatsApp</a>
+          <a class="button sms-button">SMS</a>
+          <a class="button email-button">Email</a>
+          <button class="button share-button" type="button">Share</button>
         </div>
       </article>
     </template>
 
-    <script src="app.js" defer></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
