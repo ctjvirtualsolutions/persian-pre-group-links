@@ -9,24 +9,87 @@
   </head>
   <body>
     <header class="site-header">
-      <div class="shell hero">
-        <p class="eyebrow">Persian Pre-Group</p>
-        <h1 id="site-title">Meeting Messages</h1>
-        <p id="site-subtitle" class="intro">Loading meeting details…</p>
+      <nav class="top-nav shell" aria-label="Primary navigation">
+        <a class="brand" href="#top">Persian Pre-Group</a>
+        <div class="nav-links">
+          <a href="#meetings">Meetings</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </nav>
+
+      <div id="top" class="shell hero-shell">
+        <section class="hero-copy" aria-labelledby="site-title">
+          <p class="eyebrow">Meeting Message Portal</p>
+          <h1 id="site-title">Meeting Messages</h1>
+          <p id="site-subtitle" class="intro">Loading meeting details…</p>
+          <div class="hero-actions">
+            <a class="button" href="#language-cards">View invitations</a>
+            <a class="button ghost-button" href="#meeting-dashboard">Meeting details</a>
+          </div>
+        </section>
+
+        <figure id="main-image-wrap" class="main-image-wrap" hidden>
+          <img id="main-image" class="main-image" alt="">
+        </figure>
       </div>
     </header>
 
-    <main class="shell">
-      <figure id="main-image-wrap" class="main-image-wrap" hidden>
-        <img id="main-image" class="main-image" alt="">
-      </figure>
+    <main>
+      <section id="meetings" class="shell section-block meeting-overview" aria-labelledby="meeting-overview-title">
+        <div class="section-heading">
+          <p class="eyebrow">Current Meeting</p>
+          <h2 id="meeting-overview-title">Meeting details at a glance</h2>
+          <p>Use the language cards below to copy or share the formatted invitation message.</p>
+        </div>
 
-      <section id="language-cards" class="card-grid" aria-live="polite"></section>
-      <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
+        <div id="meeting-dashboard" class="dashboard-grid" aria-live="polite">
+          <article class="dashboard-card">
+            <p class="dashboard-label">Date / Day</p>
+            <p id="dashboard-date" class="dashboard-value">Loading…</p>
+          </article>
+          <article class="dashboard-card">
+            <p class="dashboard-label">Time</p>
+            <p id="dashboard-time" class="dashboard-value">Loading…</p>
+          </article>
+          <article class="dashboard-card">
+            <p class="dashboard-label">Location / Map</p>
+            <p id="dashboard-location" class="dashboard-value">Loading…</p>
+          </article>
+          <article class="dashboard-card dashboard-card-accent">
+            <p class="dashboard-label">Zoom details</p>
+            <p id="dashboard-zoom" class="dashboard-value">Loading…</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell section-block" aria-labelledby="invitation-title">
+        <div class="section-heading section-heading-row">
+          <div>
+            <p class="eyebrow">Multilingual Invitations</p>
+            <h2 id="invitation-title">Invitation messages</h2>
+          </div>
+          <p>Persian, Dari, English, Portuguese, and enabled custom timezone cards.</p>
+        </div>
+        <section id="language-cards" class="card-grid" aria-live="polite"></section>
+        <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section id="about" class="shell section-block info-panel">
+        <div>
+          <p class="eyebrow">About</p>
+          <h2>A clear place for current meeting invitations</h2>
+        </div>
+        <p>This page keeps the latest invitation details in one simple, readable location for friends and guests.</p>
+      </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="shell">
+    <footer id="contact" class="site-footer">
+      <div class="shell footer-inner">
+        <div>
+          <a class="brand" href="#top">Persian Pre-Group</a>
+          <p>Professional multilingual meeting messages.</p>
+        </div>
         <p><a href="admin.html">Admin</a></p>
       </div>
     </footer>
