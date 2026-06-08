@@ -14,9 +14,9 @@ No Firebase Storage setup is required. The app stores page content in Firestore 
 ## Files
 
 - `index.html` — public meeting-message page.
-- `app.js` — live Firestore reader for `site/current` and public card rendering.
-- `content-defaults.js` — starter document content used before the first admin save.
-- `admin.html` — password-protected admin page.
+- `app.js` — live Firestore reader for `site/current`, emoji message building, timezone conversion, and public card rendering.
+- `content-defaults.js` — starter document content and language defaults used before the first admin save.
+- `admin.html` — password-protected admin page focused on the weekly workflow.
 - `admin.js` — Firebase Auth login and Firestore save logic.
 - `firebase-config.js` — clearly marked Firebase web app config placeholders.
 - `styles.css` — shared public/admin styling.
@@ -52,7 +52,80 @@ No Firebase Storage setup is required. The app stores page content in Firestore 
 
 ## Updating meeting content
 
-Meeting updates are made through `admin.html`, not by editing `config.json` or running an export step. Sign in at `/admin.html` with the Firebase Authentication admin user, edit the page content, language visibility, meeting details, language-specific labels/values, and main image URL, then click **Save to Firestore**.
+Meeting updates are made through `admin.html`. Sign in at `/admin.html` with the Firebase Authentication admin user, update the weekly fields, then click **Save to Firestore**.
+
+The simple admin workflow includes:
+
+- page title and subtitle
+- main image URL
+- show/hide checkboxes for the talk, map, and Zoom sections
+- base meeting date
+- base day text
+- base Brasília time
+- address lines, map link, Zoom link, meeting ID, and passcode
+- talk title fields for Persian/Farsi, Dari, English, and Brazilian Portuguese
+- two optional custom message cards
+
+The four main language cards always exist on the public page:
+
+- `fa` — Persian/Farsi
+- `prs` — Dari
+- `en` — English
+- `pt` — Brazilian Portuguese
+
+Language names, native names, text direction, headings, and labels stay in code defaults so the normal weekly workflow stays short. Persian and Dari remain right-to-left.
+
+## Emoji message format
+
+Every Copy, WhatsApp, SMS, Email, and Share action uses the same emoji-formatted message built by `app.js`. You do not need to type emojis into language labels. The format is:
+
+```text
+Heading
+Talk label: Talk title
+
+📅 Day label: Day value
+🕙 Time label: Time value
+
+📍 Address label:
+Address line 1
+Address line 2
+Address line 3
+Address line 4
+🗺️ Map label: map link
+
+💻 Zoom label: zoom link
+🆔 Meeting ID label: meeting ID
+🔐 Passcode label: passcode
+```
+
+The talk, map, and Zoom sections follow the admin show/hide checkboxes.
+
+## Custom message cards and timezones
+
+The admin page supports two optional custom cards. Each custom card has:
+
+- enabled checkbox
+- display name
+- language selection: Persian, Dari, English, Portuguese, or German
+- timezone selection
+- optional time label override
+- optional talk title override
+
+The base time is the Brasília time field. Custom cards use `Intl.DateTimeFormat` in the browser to calculate local time for the selected timezone; no timezone library is used.
+
+Available timezone choices are:
+
+- `America/Sao_Paulo` — Brasília
+- `Asia/Kabul` — Kabul
+- `Europe/Copenhagen` — Copenhagen
+- `Europe/London` — London
+- `Europe/Berlin` — Berlin
+- `America/New_York` — Eastern Time
+- `America/Chicago` — Central Time
+- `America/Denver` — Mountain Time
+- `America/Los_Angeles` — Pacific Time
+- `America/Toronto` — Toronto
+- `Asia/Tokyo` — Tokyo
 
 ## Main image URL
 
@@ -77,14 +150,22 @@ Important top-level fields include:
 - `showTalk`
 - `showMap`
 - `showZoom`
+- `baseMeetingDate`
+- `baseDayText`
+- `baseBrasiliaTime`
 - `addressLines`
 - `mapLink`
 - `zoomLink`
 - `meetingId`
 - `passcode`
+- `customCards`
 - `languages`
 
-Each language entry includes `enabled`, `name`, `nativeName`, `dir`, and all language-specific labels and values used by the public cards.
+Each language entry keeps `enabled`, `name`, `nativeName`, `dir`, headings, labels, and talk titles. The simple admin page only edits the four main talk titles. New fields have sensible defaults in `content-defaults.js`, and the app keeps using the existing Firestore document path `site/current`.
+
+## Google Stitch design handoff
+
+The app remains plain HTML, CSS, and JavaScript with stable IDs/classes around the Firebase logic. If you later provide Google Stitch HTML/CSS, translate the visual styles into `index.html`, `admin.html`, and `styles.css` while keeping the Firebase reads/writes, message builder, buttons, and Firestore path unchanged.
 
 ## First content save
 

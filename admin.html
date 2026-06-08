@@ -12,7 +12,7 @@
       <div class="shell hero">
         <p class="eyebrow">Firebase Admin</p>
         <h1>Meeting Message Admin</h1>
-        <p class="intro">Sign in with Firebase Authentication to update Firestore content.</p>
+        <p class="intro">Sign in with Firebase Authentication to update the weekly message saved at <code>site/current</code>.</p>
       </div>
     </header>
 
@@ -29,8 +29,8 @@
       <section id="admin-panel" class="admin-card" hidden>
         <div class="admin-heading-row">
           <div>
-            <h2>Edit public page</h2>
-            <p>Changes save directly to <code>site/current</code>.</p>
+            <h2>Weekly meeting workflow</h2>
+            <p>Edit the normal weekly fields. Language labels, direction, and headings stay in code defaults.</p>
           </div>
           <button id="logout-button" class="button secondary-button" type="button">Sign out</button>
         </div>
@@ -41,15 +41,20 @@
             <div class="form-grid">
               <label>Page title<input name="title" required></label>
               <label>Subtitle<input name="subtitle"></label>
+              <label class="wide">Main image URL<input name="mainImageUrl" type="url" placeholder="https://example.com/image.jpg"></label>
               <label class="checkbox-label"><input type="checkbox" name="showTalk"> Show talk</label>
               <label class="checkbox-label"><input type="checkbox" name="showMap"> Show map</label>
               <label class="checkbox-label"><input type="checkbox" name="showZoom"> Show Zoom</label>
             </div>
+            <img id="image-preview" class="image-preview" alt="Current main image preview" hidden>
           </fieldset>
 
           <fieldset>
             <legend>Meeting details</legend>
             <div class="form-grid">
+              <label>Base meeting date<input name="baseMeetingDate" type="date"></label>
+              <label>Base day text<input name="baseDayText" placeholder="Sunday"></label>
+              <label>Base Brasília time<input name="baseBrasiliaTime" type="time"></label>
               <label class="wide">Address lines<textarea name="addressLines" rows="4"></textarea></label>
               <label>Map link<input name="mapLink" type="url"></label>
               <label>Zoom link<input name="zoomLink" type="url"></label>
@@ -59,14 +64,15 @@
           </fieldset>
 
           <fieldset>
-            <legend>Main image</legend>
-            <div class="form-grid">
-              <label class="wide">Main image URL<input name="mainImageUrl" type="url" placeholder="https://example.com/image.jpg"></label>
-            </div>
-            <img id="image-preview" class="image-preview" alt="Current main image preview" hidden>
+            <legend>Talk titles</legend>
+            <div id="talk-title-editor" class="form-grid"></div>
           </fieldset>
 
-          <div id="language-editor" class="language-editor"></div>
+          <fieldset>
+            <legend>Optional custom message cards</legend>
+            <p class="field-help">Custom cards reuse the selected language defaults and convert the base Brasília time to the selected timezone.</p>
+            <div id="custom-card-editor" class="custom-card-editor"></div>
+          </fieldset>
 
           <button class="button save-button" type="submit">Save to Firestore</button>
         </form>
