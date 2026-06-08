@@ -59,9 +59,9 @@ img {
 }
 
 .top-nav {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1.5rem;
   min-height: 4.25rem;
 }
@@ -100,11 +100,6 @@ img {
   text-underline-offset: 0.25rem;
 }
 
-.language-nav {
-  justify-self: end;
-  color: var(--primary-dark);
-  font-weight: 700;
-}
 
 .hero,
 .hero-copy {
@@ -438,6 +433,7 @@ textarea:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 0.85rem 1.05rem;
+  direction: ltr;
   justify-content: center;
   margin-top: auto;
   padding-top: 1rem;
@@ -465,6 +461,12 @@ textarea:focus-visible {
   background: #ececef;
   color: var(--muted);
   font-size: 1rem;
+}
+
+.action-button svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: currentColor;
 }
 
 .action-button:hover,
@@ -656,7 +658,6 @@ textarea {
 }
 
 @media (max-width: 900px) {
-  .top-nav,
   .meeting-details-card,
   .card-grid,
   .info-panel,
@@ -664,14 +665,13 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .top-nav,
+  .footer-inner,
   .nav-links,
   .footer-links {
     justify-content: flex-start;
   }
 
-  .language-nav {
-    justify-self: start;
-  }
 }
 
 @media (max-width: 700px) {
