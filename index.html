@@ -10,66 +10,64 @@
   <body>
     <header class="site-header">
       <nav class="top-nav shell" aria-label="Primary navigation">
-        <a class="brand" href="#top">Persian Pre-Group</a>
+        <a class="brand" href="#top">Portal</a>
         <div class="nav-links">
           <a href="#meetings">Meetings</a>
           <a href="#about">About</a>
           <a href="#contact">Contact</a>
         </div>
+        <span class="language-nav" aria-label="Language selector label">Language 🌐</span>
       </nav>
-
-      <div id="top" class="shell hero-shell">
-        <section class="hero-copy" aria-labelledby="site-title">
-          <p class="eyebrow">Meeting Message Portal</p>
-          <h1 id="site-title">Meeting Messages</h1>
-          <p id="site-subtitle" class="intro">Loading meeting details…</p>
-          <div class="hero-actions">
-            <a class="button" href="#language-cards">View invitations</a>
-            <a class="button ghost-button" href="#meeting-dashboard">Meeting details</a>
-          </div>
-        </section>
-
-        <figure id="main-image-wrap" class="main-image-wrap" hidden>
-          <img id="main-image" class="main-image" alt="">
-        </figure>
-      </div>
     </header>
 
-    <main>
-      <section id="meetings" class="shell section-block meeting-overview" aria-labelledby="meeting-overview-title">
-        <div class="section-heading">
-          <p class="eyebrow">Current Meeting</p>
-          <h2 id="meeting-overview-title">Meeting details at a glance</h2>
-          <p>Use the language cards below to copy or share the formatted invitation message.</p>
-        </div>
-
-        <div id="meeting-dashboard" class="dashboard-grid" aria-live="polite">
-          <article class="dashboard-card">
-            <p class="dashboard-label">Date / Day</p>
-            <p id="dashboard-date" class="dashboard-value">Loading…</p>
-          </article>
-          <article class="dashboard-card">
-            <p class="dashboard-label">Time</p>
-            <p id="dashboard-time" class="dashboard-value">Loading…</p>
-          </article>
-          <article class="dashboard-card">
-            <p class="dashboard-label">Location / Map</p>
-            <p id="dashboard-location" class="dashboard-value">Loading…</p>
-          </article>
-          <article class="dashboard-card dashboard-card-accent">
-            <p class="dashboard-label">Zoom details</p>
-            <p id="dashboard-zoom" class="dashboard-value">Loading…</p>
-          </article>
-        </div>
+    <main id="top">
+      <section class="shell hero-shell" aria-labelledby="site-title">
+        <figure id="main-image-wrap" class="main-image-wrap no-image">
+          <img id="main-image" class="main-image" alt="" hidden>
+          <figcaption class="hero-overlay">
+            <p class="eyebrow">Meeting Message Portal</p>
+            <h1 id="site-title">Meeting Messages</h1>
+            <p id="site-subtitle" class="intro">Loading meeting details…</p>
+          </figcaption>
+        </figure>
       </section>
 
-      <section class="shell section-block" aria-labelledby="invitation-title">
-        <div class="section-heading section-heading-row">
-          <div>
-            <p class="eyebrow">Multilingual Invitations</p>
-            <h2 id="invitation-title">Invitation messages</h2>
+      <section id="meetings" class="shell section-block meeting-overview" aria-labelledby="meeting-overview-title">
+        <h2 id="meeting-overview-title" class="visually-hidden">Meeting details</h2>
+
+        <article id="meeting-dashboard" class="meeting-details-card" aria-live="polite">
+          <div class="meeting-details-main">
+            <div class="detail-group">
+              <p class="detail-label">Date &amp; Time</p>
+              <p id="dashboard-date-time" class="detail-value large-value">Loading…</p>
+            </div>
+            <div class="detail-group">
+              <p class="detail-label">Location</p>
+              <div class="location-line">
+                <span aria-hidden="true">⌖</span>
+                <p id="dashboard-location" class="detail-value">Loading…</p>
+              </div>
+              <p id="dashboard-map-wrap" class="map-link-wrap" hidden>
+                <a id="dashboard-map-link" href="#" target="_blank" rel="noopener">Open map</a>
+              </p>
+            </div>
           </div>
-          <p>Persian, Dari, English, Portuguese, and enabled custom timezone cards.</p>
+
+          <aside id="dashboard-zoom-panel" class="zoom-panel">
+            <p class="detail-label">Zoom details</p>
+            <p class="zoom-meta">Meeting ID:</p>
+            <p id="dashboard-meeting-id" class="zoom-value">Loading…</p>
+            <p class="zoom-meta">Passcode:</p>
+            <p id="dashboard-passcode" class="zoom-value">Loading…</p>
+            <a id="dashboard-zoom-link" class="button zoom-button" href="#" target="_blank" rel="noopener" hidden>Open Zoom</a>
+          </aside>
+        </article>
+      </section>
+
+      <section class="shell section-block invitations-section" aria-labelledby="invitation-title">
+        <div class="invitation-heading">
+          <h2 id="invitation-title">Invitation Messages</h2>
+          <span aria-hidden="true"></span>
         </div>
         <section id="language-cards" class="card-grid" aria-live="polite"></section>
         <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
@@ -86,25 +84,27 @@
 
     <footer id="contact" class="site-footer">
       <div class="shell footer-inner">
-        <div>
-          <a class="brand" href="#top">Persian Pre-Group</a>
-          <p>Professional multilingual meeting messages.</p>
+        <a class="brand" href="#top">Portal</a>
+        <p>© 2024 Meeting Messages Portal. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="#contact">Privacy Policy</a>
+          <a href="#contact">Terms of Service</a>
+          <a href="#contact">Help Center</a>
+          <a href="admin.html">Admin</a>
         </div>
-        <p><a href="admin.html">Admin</a></p>
       </div>
     </footer>
 
     <template id="language-card-template">
       <article class="language-card">
         <p class="language-name"></p>
-        <h2 class="message-heading"></h2>
-        <dl class="message-details"></dl>
-        <div class="button-row">
-          <button class="button copy-button" type="button">Copy</button>
-          <a class="button whatsapp-button" target="_blank" rel="noopener">WhatsApp</a>
-          <a class="button sms-button">SMS</a>
-          <a class="button email-button">Email</a>
-          <button class="button share-button" type="button">Share</button>
+        <pre class="message-preview"></pre>
+        <div class="button-row" aria-label="Sharing actions">
+          <button class="action-button copy-button" type="button" aria-label="Copy message"><span aria-hidden="true">⧉</span><span>Copy</span></button>
+          <a class="action-button whatsapp-button" target="_blank" rel="noopener" aria-label="Share on WhatsApp"><span aria-hidden="true">☏</span><span>WhatsApp</span></a>
+          <a class="action-button sms-button" aria-label="Share by SMS"><span aria-hidden="true">▣</span><span>SMS</span></a>
+          <a class="action-button email-button" aria-label="Share by email"><span aria-hidden="true">✉</span><span>Email</span></a>
+          <button class="action-button share-button" type="button" aria-label="Share message"><span aria-hidden="true">⌯</span><span>Share</span></button>
         </div>
       </article>
     </template>
