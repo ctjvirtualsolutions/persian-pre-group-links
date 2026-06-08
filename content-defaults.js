@@ -5,6 +5,9 @@ export const defaultContent = {
   showTalk: true,
   showMap: true,
   showZoom: true,
+  baseMeetingDate: '',
+  baseDayText: 'Sunday',
+  baseBrasiliaTime: '10:00',
   addressLines: [
     'Av. General Ataliba Leonel, 3339',
     'Parada Inglesa',
@@ -15,6 +18,24 @@ export const defaultContent = {
   zoomLink: 'https://bit.ly/4sjP1T1',
   meetingId: '89558642683',
   passcode: '028443',
+  customCards: [
+    {
+      enabled: false,
+      displayName: 'Dari — Kabul Time',
+      languageCode: 'prs',
+      timezone: 'Asia/Kabul',
+      timeLabelOverride: '',
+      talkTitleOverride: ''
+    },
+    {
+      enabled: false,
+      displayName: 'English — Eastern Time',
+      languageCode: 'en',
+      timezone: 'America/New_York',
+      timeLabelOverride: '',
+      talkTitleOverride: ''
+    }
+  ],
   languages: {
     fa: {
       enabled: true,
@@ -72,8 +93,8 @@ export const defaultContent = {
     },
     pt: {
       enabled: true,
-      name: 'Portuguese',
-      nativeName: 'Português',
+      name: 'Brazilian Portuguese',
+      nativeName: 'Português do Brasil',
       dir: 'ltr',
       heading: 'Reunião de fim de semana das Testemunhas de Jeová',
       talkLabel: 'Título do discurso',
@@ -89,7 +110,7 @@ export const defaultContent = {
       passcodeLabel: 'Senha'
     },
     de: {
-      enabled: true,
+      enabled: false,
       name: 'German',
       nativeName: 'Deutsch',
       dir: 'ltr',

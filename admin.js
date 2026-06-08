@@ -15,26 +15,33 @@ import {
 import { firebaseConfig } from './firebase-config.js';
 import { defaultContent } from './content-defaults.js';
 
-const languageOrder = ['fa', 'prs', 'en', 'pt', 'de'];
-const fieldLabels = {
-  heading: 'Heading',
-  talkLabel: 'Talk label',
-  talkTitle: 'Talk title',
-  dayLabel: 'Day label',
-  dayValue: 'Day value',
-  timeLabel: 'Time label',
-  timeValue: 'Time value',
-  addressLabel: 'Address label',
-  mapLabel: 'Map label',
-  zoomLabel: 'Zoom label',
-  meetingIdLabel: 'Meeting ID label',
-  passcodeLabel: 'Passcode label'
-};
+const mainLanguageCodes = ['fa', 'prs', 'en', 'pt'];
+const languageOptions = [
+  ['fa', 'Persian'],
+  ['prs', 'Dari'],
+  ['en', 'English'],
+  ['pt', 'Portuguese'],
+  ['de', 'German']
+];
+const timezoneOptions = [
+  ['America/Sao_Paulo', 'America/Sao_Paulo — Brasília'],
+  ['Asia/Kabul', 'Asia/Kabul — Kabul'],
+  ['Europe/Copenhagen', 'Europe/Copenhagen — Copenhagen'],
+  ['Europe/London', 'Europe/London — London'],
+  ['Europe/Berlin', 'Europe/Berlin — Berlin'],
+  ['America/New_York', 'America/New_York — Eastern Time'],
+  ['America/Chicago', 'America/Chicago — Central Time'],
+  ['America/Denver', 'America/Denver — Mountain Time'],
+  ['America/Los_Angeles', 'America/Los_Angeles — Pacific Time'],
+  ['America/Toronto', 'America/Toronto — Toronto'],
+  ['Asia/Tokyo', 'Asia/Tokyo — Tokyo']
+];
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const siteRef = doc(db, 'site', 'current');
+let loadedContent = mergeContent();
 
 const elements = {
   loginPanel: document.querySelector('#login-panel'),
@@ -43,7 +50,8 @@ const elements = {
   contentForm: document.querySelector('#content-form'),
   logoutButton: document.querySelector('#logout-button'),
   status: document.querySelector('#admin-status'),
-  languageEditor: document.querySelector('#language-editor'),
+  talkTitleEditor: document.querySelector('#talk-title-editor'),
+  customCardEditor: document.querySelector('#custom-card-editor'),
   imagePreview: document.querySelector('#image-preview')
 };
 
@@ -51,14 +59,42 @@ function setStatus(message) {
   elements.status.textContent = message;
 }
 
+function normalizeTime(value) {
+  if (!value) return '';
+  const match = String(value).trim().match(/^(\d{1,2}):(\d{2})(?:\s*([AP]M))?/i);
+  if (!match) return '';
+
+  let hour = Number(match[1]);
+  const minute = match[2];
+  const meridiem = match[3]?.toUpperCase();
+  if (meridiem === 'PM' && hour < 12) hour += 12;
+  if (meridiem === 'AM' && hour === 12) hour = 0;
+  return `${String(hour).padStart(2, '0')}:${minute}`;
+}
+
 function mergeContent(data = {}) {
+  const languages = Object.fromEntries(
+    Object.entries(defaultContent.languages).map(([code, language]) => [
+      code,
+      {
+        ...language,
+        ...(data.languages?.[code] || {})
+      }
+    ])
+  );
+  const baseDayText = data.baseDayText || data.languages?.en?.dayValue || defaultContent.baseDayText;
+  const baseBrasiliaTime = normalizeTime(data.baseBrasiliaTime || data.languages?.pt?.timeValue || defaultContent.baseBrasiliaTime);
+
   return {
     ...defaultContent,
     ...data,
-    languages: {
-      ...defaultContent.languages,
-      ...(data.languages || {})
-    }
+    baseDayText,
+    baseBrasiliaTime,
+    customCards: [0, 1].map((index) => ({
+      ...defaultContent.customCards[index],
+      ...(data.customCards?.[index] || {})
+    })),
+    languages
   };
 }
 
@@ -76,104 +112,124 @@ function getInput(name) {
   return input.type === 'checkbox' ? input.checked : input.value.trim();
 }
 
-function createLanguageEditor(code, language) {
-  const fieldset = document.createElement('fieldset');
-  fieldset.className = 'language-fieldset';
-  fieldset.dir = language.dir || 'ltr';
-
-  const legend = document.createElement('legend');
-  legend.textContent = `${language.name} (${code})`;
-  fieldset.append(legend);
-
-  const metaGrid = document.createElement('div');
-  metaGrid.className = 'form-grid';
-  metaGrid.innerHTML = `
-    <label class="checkbox-label wide" dir="ltr">
-      <input type="checkbox" name="languages.${code}.enabled">
-      Show this language on the public page
-    </label>
-    <label>Name<input name="languages.${code}.name" autocomplete="off"></label>
-    <label>Native name<input name="languages.${code}.nativeName" autocomplete="off"></label>
-    <label>Direction
-      <select name="languages.${code}.dir">
-        <option value="ltr">Left to right</option>
-        <option value="rtl">Right to left</option>
-      </select>
-    </label>
-  `;
-  fieldset.append(metaGrid);
-
-  const fieldsGrid = document.createElement('div');
-  fieldsGrid.className = 'form-grid';
-  Object.entries(fieldLabels).forEach(([field, label]) => {
-    const wrapper = document.createElement('label');
-    wrapper.textContent = label;
-
-    const input = field === 'heading' || field === 'talkTitle'
-      ? document.createElement('textarea')
-      : document.createElement('input');
-    input.name = `languages.${code}.${field}`;
-    input.autocomplete = 'off';
-    if (input.tagName === 'TEXTAREA') input.rows = 2;
-
-    wrapper.append(input);
-    fieldsGrid.append(wrapper);
-  });
-  fieldset.append(fieldsGrid);
-
-  return fieldset;
+function createOptions(options) {
+  return options.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
 }
 
-function renderLanguageEditors(content) {
-  elements.languageEditor.replaceChildren();
-  languageOrder.forEach((code) => {
-    elements.languageEditor.append(createLanguageEditor(code, content.languages[code]));
+function renderTalkTitleEditors(content) {
+  elements.talkTitleEditor.replaceChildren();
+
+  mainLanguageCodes.forEach((code) => {
+    const language = content.languages[code];
+    const label = document.createElement('label');
+    label.dir = language.dir || 'ltr';
+    label.textContent = language.name;
+
+    const input = document.createElement('textarea');
+    input.name = `languages.${code}.talkTitle`;
+    input.rows = 2;
+    input.autocomplete = 'off';
+
+    label.append(input);
+    elements.talkTitleEditor.append(label);
+  });
+}
+
+function renderCustomCardEditors() {
+  elements.customCardEditor.replaceChildren();
+
+  [0, 1].forEach((index) => {
+    const fieldset = document.createElement('fieldset');
+    fieldset.className = 'custom-card-fieldset';
+    fieldset.innerHTML = `
+      <legend>Custom version ${index + 1}</legend>
+      <div class="form-grid">
+        <label class="checkbox-label wide">
+          <input type="checkbox" name="customCards.${index}.enabled">
+          Enable this custom card
+        </label>
+        <label>Display name<input name="customCards.${index}.displayName" placeholder="Dari — Kabul Time"></label>
+        <label>Language
+          <select name="customCards.${index}.languageCode">${createOptions(languageOptions)}</select>
+        </label>
+        <label>Timezone
+          <select name="customCards.${index}.timezone">${createOptions(timezoneOptions)}</select>
+        </label>
+        <label>Optional time label override<input name="customCards.${index}.timeLabelOverride" placeholder="Local time"></label>
+        <label>Optional talk title override<textarea name="customCards.${index}.talkTitleOverride" rows="2"></textarea></label>
+      </div>
+    `;
+    elements.customCardEditor.append(fieldset);
   });
 }
 
 function fillForm(content) {
   setInput('title', content.title);
   setInput('subtitle', content.subtitle);
+  setInput('mainImageUrl', content.mainImageUrl);
   setInput('showTalk', content.showTalk);
   setInput('showMap', content.showMap);
   setInput('showZoom', content.showZoom);
+  setInput('baseMeetingDate', content.baseMeetingDate);
+  setInput('baseDayText', content.baseDayText);
+  setInput('baseBrasiliaTime', content.baseBrasiliaTime);
   setInput('addressLines', (content.addressLines || []).join('\n'));
   setInput('mapLink', content.mapLink);
   setInput('zoomLink', content.zoomLink);
   setInput('meetingId', content.meetingId);
   setInput('passcode', content.passcode);
-  setInput('mainImageUrl', content.mainImageUrl);
 
   elements.imagePreview.hidden = !content.mainImageUrl;
   if (content.mainImageUrl) elements.imagePreview.src = content.mainImageUrl;
 
-  Object.entries(content.languages).forEach(([code, language]) => {
-    setInput(`languages.${code}.enabled`, language.enabled);
-    setInput(`languages.${code}.name`, language.name);
-    setInput(`languages.${code}.nativeName`, language.nativeName);
-    setInput(`languages.${code}.dir`, language.dir);
-    Object.keys(fieldLabels).forEach((field) => {
-      setInput(`languages.${code}.${field}`, language[field]);
-    });
+  mainLanguageCodes.forEach((code) => {
+    setInput(`languages.${code}.talkTitle`, content.languages[code]?.talkTitle);
+  });
+
+  content.customCards.forEach((customCard, index) => {
+    setInput(`customCards.${index}.enabled`, customCard.enabled);
+    setInput(`customCards.${index}.displayName`, customCard.displayName);
+    setInput(`customCards.${index}.languageCode`, customCard.languageCode);
+    setInput(`customCards.${index}.timezone`, customCard.timezone);
+    setInput(`customCards.${index}.timeLabelOverride`, customCard.timeLabelOverride);
+    setInput(`customCards.${index}.talkTitleOverride`, customCard.talkTitleOverride);
   });
 }
 
-function collectFormData() {
-  const languages = {};
+function collectLanguages() {
+  const languages = Object.fromEntries(
+    Object.entries(defaultContent.languages).map(([code, language]) => [
+      code,
+      {
+        ...language,
+        ...(loadedContent.languages?.[code] || {})
+      }
+    ])
+  );
 
-  languageOrder.forEach((code) => {
+  mainLanguageCodes.forEach((code) => {
     languages[code] = {
-      enabled: getInput(`languages.${code}.enabled`),
-      name: getInput(`languages.${code}.name`),
-      nativeName: getInput(`languages.${code}.nativeName`),
-      dir: getInput(`languages.${code}.dir`) || 'ltr'
+      ...languages[code],
+      enabled: true,
+      talkTitle: getInput(`languages.${code}.talkTitle`) || languages[code].talkTitle
     };
-
-    Object.keys(fieldLabels).forEach((field) => {
-      languages[code][field] = getInput(`languages.${code}.${field}`);
-    });
   });
 
+  return languages;
+}
+
+function collectCustomCards() {
+  return [0, 1].map((index) => ({
+    enabled: getInput(`customCards.${index}.enabled`),
+    displayName: getInput(`customCards.${index}.displayName`),
+    languageCode: getInput(`customCards.${index}.languageCode`) || defaultContent.customCards[index].languageCode,
+    timezone: getInput(`customCards.${index}.timezone`) || defaultContent.customCards[index].timezone,
+    timeLabelOverride: getInput(`customCards.${index}.timeLabelOverride`),
+    talkTitleOverride: getInput(`customCards.${index}.talkTitleOverride`)
+  }));
+}
+
+function collectFormData() {
   return {
     title: getInput('title'),
     subtitle: getInput('subtitle'),
@@ -181,12 +237,16 @@ function collectFormData() {
     showTalk: getInput('showTalk'),
     showMap: getInput('showMap'),
     showZoom: getInput('showZoom'),
+    baseMeetingDate: getInput('baseMeetingDate'),
+    baseDayText: getInput('baseDayText'),
+    baseBrasiliaTime: getInput('baseBrasiliaTime'),
     addressLines: getInput('addressLines').split('\n').map((line) => line.trim()).filter(Boolean),
     mapLink: getInput('mapLink'),
     zoomLink: getInput('zoomLink'),
     meetingId: getInput('meetingId'),
     passcode: getInput('passcode'),
-    languages,
+    customCards: collectCustomCards(),
+    languages: collectLanguages(),
     updatedAt: serverTimestamp()
   };
 }
@@ -195,7 +255,9 @@ async function loadContent() {
   setStatus('Loading content…');
   const snapshot = await getDoc(siteRef);
   const content = mergeContent(snapshot.exists() ? snapshot.data() : {});
-  renderLanguageEditors(content);
+  loadedContent = content;
+  renderTalkTitleEditors(content);
+  renderCustomCardEditors();
   fillForm(content);
   setStatus(snapshot.exists() ? 'Content loaded.' : 'Default content loaded. Save once to create site/current.');
 }
