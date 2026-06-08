@@ -12,7 +12,7 @@
       <div class="shell hero">
         <p class="eyebrow">Firebase Admin</p>
         <h1>Meeting Message Admin</h1>
-        <p class="intro">Sign in with Firebase Authentication to update Firestore content and upload the main image.</p>
+        <p class="intro">Sign in with Firebase Authentication to update Firestore content.</p>
       </div>
     </header>
 
@@ -61,8 +61,7 @@
           <fieldset>
             <legend>Main image</legend>
             <div class="form-grid">
-              <label class="wide">Current image URL<input name="mainImageUrl" type="url" placeholder="Saved automatically after upload"></label>
-              <label class="wide">Upload replacement image<input name="mainImageFile" type="file" accept="image/*"></label>
+              <label class="wide">Main image URL<input name="mainImageUrl" type="url" placeholder="https://example.com/image.jpg"></label>
             </div>
             <img id="image-preview" class="image-preview" alt="Current main image preview" hidden>
           </fieldset>

@@ -12,12 +12,6 @@ import {
   serverTimestamp,
   setDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytes
-} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js';
 import { firebaseConfig } from './firebase-config.js';
 import { defaultContent } from './content-defaults.js';
 
@@ -40,7 +34,6 @@ const fieldLabels = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 const siteRef = doc(db, 'site', 'current');
 
 const elements = {
@@ -207,19 +200,6 @@ async function loadContent() {
   setStatus(snapshot.exists() ? 'Content loaded.' : 'Default content loaded. Save once to create site/current.');
 }
 
-async function uploadMainImageIfSelected() {
-  const fileInput = elements.contentForm.elements.mainImageFile;
-  const file = fileInput.files[0];
-  if (!file) return getInput('mainImageUrl');
-
-  setStatus('Uploading image…');
-  const extension = file.name.split('.').pop() || 'jpg';
-  const storagePath = `site/current/main-image-${Date.now()}.${extension}`;
-  const imageRef = ref(storage, storagePath);
-  await uploadBytes(imageRef, file, { contentType: file.type });
-  return getDownloadURL(imageRef);
-}
-
 elements.loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   setStatus('Signing in…');
@@ -233,9 +213,6 @@ elements.logoutButton.addEventListener('click', () => signOut(auth));
 
 elements.contentForm.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const imageUrl = await uploadMainImageIfSelected();
-  setInput('mainImageUrl', imageUrl);
-
   setStatus('Saving to Firestore…');
   await setDoc(siteRef, collectFormData(), { merge: true });
   setStatus('Saved. The public page updates live.');
