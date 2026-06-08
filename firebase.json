@@ -5,14 +5,10 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "firestore.rules",
-      "storage.rules"
+      "firestore.rules"
     ]
   },
   "firestore": {
     "rules": "firestore.rules"
-  },
-  "storage": {
-    "rules": "storage.rules"
   }
 }
