@@ -37,10 +37,14 @@ const elements = {
   subtitle: document.querySelector('#site-subtitle'),
   imageWrap: document.querySelector('#main-image-wrap'),
   image: document.querySelector('#main-image'),
-  dashboardDate: document.querySelector('#dashboard-date'),
-  dashboardTime: document.querySelector('#dashboard-time'),
+  dashboardDateTime: document.querySelector('#dashboard-date-time'),
   dashboardLocation: document.querySelector('#dashboard-location'),
-  dashboardZoom: document.querySelector('#dashboard-zoom'),
+  dashboardMapWrap: document.querySelector('#dashboard-map-wrap'),
+  dashboardMapLink: document.querySelector('#dashboard-map-link'),
+  dashboardZoomPanel: document.querySelector('#dashboard-zoom-panel'),
+  dashboardMeetingId: document.querySelector('#dashboard-meeting-id'),
+  dashboardPasscode: document.querySelector('#dashboard-passcode'),
+  dashboardZoomLink: document.querySelector('#dashboard-zoom-link'),
   cards: document.querySelector('#language-cards'),
   status: document.querySelector('#status-message'),
   template: document.querySelector('#language-card-template')
@@ -151,49 +155,6 @@ function getCards(content) {
   return [...getMainLanguageCards(content), ...getCustomLanguageCards(content)];
 }
 
-function createDetail(label, value, href = '', emoji = '') {
-  if (!value) return null;
-
-  const wrapper = document.createElement('div');
-  wrapper.className = 'detail-item';
-
-  const term = document.createElement('dt');
-  term.textContent = emoji ? `${emoji} ${label}` : label;
-
-  const description = document.createElement('dd');
-  if (href) {
-    const link = document.createElement('a');
-    link.href = href;
-    link.target = '_blank';
-    link.rel = 'noopener';
-    link.textContent = value;
-    description.append(link);
-  } else {
-    description.textContent = value;
-  }
-
-  wrapper.append(term, description);
-  return wrapper;
-}
-
-function getDetails(content, language) {
-  const address = (content.addressLines || []).filter(Boolean).join('\n');
-  const details = [];
-
-  if (content.showTalk) details.push(createDetail(language.talkLabel, language.talkTitle));
-  details.push(createDetail(language.dayLabel, language.dayValue, '', messageEmojis.day));
-  details.push(createDetail(language.timeLabel, language.timeValue, '', messageEmojis.time));
-  details.push(createDetail(language.addressLabel, address, '', messageEmojis.address));
-  if (content.showMap) details.push(createDetail(language.mapLabel, content.mapLink, content.mapLink, messageEmojis.map));
-  if (content.showZoom) {
-    details.push(createDetail(language.zoomLabel, content.zoomLink, content.zoomLink, messageEmojis.zoom));
-    details.push(createDetail(language.meetingIdLabel, content.meetingId, '', messageEmojis.meetingId));
-    details.push(createDetail(language.passcodeLabel, content.passcode, '', messageEmojis.passcode));
-  }
-
-  return details.filter(Boolean);
-}
-
 function buildMessage(content, language) {
   const address = (content.addressLines || []).filter(Boolean).join('\n');
   const lines = [language.heading, ''];
@@ -253,9 +214,8 @@ function renderCards(content) {
 
     card.lang = language.code.startsWith('custom-') ? language.languageCode || '' : language.code;
     card.dir = language.dir || 'ltr';
-    card.querySelector('.language-name').textContent = language.cardName || `${language.name} • ${language.nativeName}`;
-    card.querySelector('.message-heading').textContent = language.heading;
-    card.querySelector('.message-details').append(...getDetails(content, language));
+    card.querySelector('.language-name').textContent = language.cardName || `${language.nativeName} · ${language.name}`;
+    card.querySelector('.message-preview').textContent = message;
 
     const copyButton = card.querySelector('.copy-button');
     copyButton.addEventListener('click', async () => {
@@ -287,28 +247,32 @@ function renderCards(content) {
 }
 
 
-function setDashboardText(element, value) {
+function setText(element, value) {
   if (!element) return;
   element.textContent = value || 'Not provided';
 }
 
 function renderDashboard(content) {
   const address = (content.addressLines || []).filter(Boolean).join('\n');
-  const locationParts = [];
-  if (address) locationParts.push(address);
-  if (content.showMap && content.mapLink) locationParts.push(content.mapLink);
+  const dateTime = [content.baseDayText, content.baseBrasiliaTime].filter(Boolean).join(', ');
 
-  const zoomParts = [];
-  if (content.showZoom) {
-    if (content.zoomLink) zoomParts.push(content.zoomLink);
-    if (content.meetingId) zoomParts.push(`Meeting ID: ${content.meetingId}`);
-    if (content.passcode) zoomParts.push(`Passcode: ${content.passcode}`);
+  setText(elements.dashboardDateTime, dateTime || content.baseMeetingDate);
+  setText(elements.dashboardLocation, address);
+
+  const showMap = Boolean(content.showMap && content.mapLink);
+  elements.dashboardMapWrap.hidden = !showMap;
+  if (showMap) elements.dashboardMapLink.href = content.mapLink;
+
+  const showZoomPanel = Boolean(content.showZoom);
+  elements.dashboardZoomPanel.hidden = !showZoomPanel;
+  if (showZoomPanel) {
+    setText(elements.dashboardMeetingId, content.meetingId);
+    setText(elements.dashboardPasscode, content.passcode);
+
+    const showZoomLink = Boolean(content.zoomLink);
+    elements.dashboardZoomLink.hidden = !showZoomLink;
+    if (showZoomLink) elements.dashboardZoomLink.href = content.zoomLink;
   }
-
-  setDashboardText(elements.dashboardDate, content.baseDayText || content.baseMeetingDate);
-  setDashboardText(elements.dashboardTime, content.baseBrasiliaTime);
-  setDashboardText(elements.dashboardLocation, locationParts.join('\n'));
-  setDashboardText(elements.dashboardZoom, zoomParts.join('\n'));
 }
 
 function renderContent(content) {
@@ -317,12 +281,14 @@ function renderContent(content) {
   elements.subtitle.textContent = content.subtitle;
   renderDashboard(content);
 
-  elements.imageWrap.hidden = !content.mainImageUrl;
+  elements.imageWrap.classList.toggle('no-image', !content.mainImageUrl);
+  elements.image.hidden = !content.mainImageUrl;
   if (content.mainImageUrl) {
     elements.image.src = content.mainImageUrl;
     elements.image.alt = content.title;
   } else {
     elements.image.removeAttribute('src');
+    elements.image.alt = '';
   }
 
   renderCards(content);
