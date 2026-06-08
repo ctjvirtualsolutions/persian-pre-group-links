@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Admin • Persian Pre-Group Meeting Messages</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header compact-header">
+      <div class="shell hero">
+        <p class="eyebrow">Firebase Admin</p>
+        <h1>Meeting Message Admin</h1>
+        <p class="intro">Sign in with Firebase Authentication to update Firestore content.</p>
+      </div>
+    </header>
+
+    <main class="shell admin-shell">
+      <section id="login-panel" class="admin-card">
+        <h2>Admin login</h2>
+        <form id="login-form" class="stacked-form">
+          <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+          <button class="button" type="submit">Sign in</button>
+        </form>
+      </section>
+
+      <section id="admin-panel" class="admin-card" hidden>
+        <div class="admin-heading-row">
+          <div>
+            <h2>Edit public page</h2>
+            <p>Changes save directly to <code>site/current</code>.</p>
+          </div>
+          <button id="logout-button" class="button secondary-button" type="button">Sign out</button>
+        </div>
+
+        <form id="content-form" class="stacked-form">
+          <fieldset>
+            <legend>Page content</legend>
+            <div class="form-grid">
+              <label>Page title<input name="title" required></label>
+              <label>Subtitle<input name="subtitle"></label>
+              <label class="checkbox-label"><input type="checkbox" name="showTalk"> Show talk</label>
+              <label class="checkbox-label"><input type="checkbox" name="showMap"> Show map</label>
+              <label class="checkbox-label"><input type="checkbox" name="showZoom"> Show Zoom</label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Meeting details</legend>
+            <div class="form-grid">
+              <label class="wide">Address lines<textarea name="addressLines" rows="4"></textarea></label>
+              <label>Map link<input name="mapLink" type="url"></label>
+              <label>Zoom link<input name="zoomLink" type="url"></label>
+              <label>Meeting ID<input name="meetingId"></label>
+              <label>Passcode<input name="passcode"></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Main image</legend>
+            <div class="form-grid">
+              <label class="wide">Main image URL<input name="mainImageUrl" type="url" placeholder="https://example.com/image.jpg"></label>
+            </div>
+            <img id="image-preview" class="image-preview" alt="Current main image preview" hidden>
+          </fieldset>
+
+          <div id="language-editor" class="language-editor"></div>
+
+          <button class="button save-button" type="submit">Save to Firestore</button>
+        </form>
+      </section>
+
+      <p id="admin-status" class="status-message" role="status" aria-live="polite">Loading…</p>
+    </main>
+
+    <script type="module" src="admin.js"></script>
+  </body>
+</html>

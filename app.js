@@ -1,117 +1,99 @@
-const configUrl = 'config.json';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import { doc, getFirestore, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+import { firebaseConfig } from './firebase-config.js';
+
+import { defaultContent } from './content-defaults.js';
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const siteRef = doc(db, 'site', 'current');
 
 const elements = {
   title: document.querySelector('#site-title'),
-  intro: document.querySelector('#site-intro'),
-  summary: document.querySelector('#meeting-summary'),
+  subtitle: document.querySelector('#site-subtitle'),
+  imageWrap: document.querySelector('#main-image-wrap'),
+  image: document.querySelector('#main-image'),
   cards: document.querySelector('#language-cards'),
   status: document.querySelector('#status-message'),
-  template: document.querySelector('#language-card-template'),
+  template: document.querySelector('#language-card-template')
 };
 
-let labels = {};
-
-async function loadConfig() {
-  const response = await fetch(configUrl, { cache: 'no-store' });
-
-  if (!response.ok) {
-    throw new Error(`Unable to load ${configUrl}`);
-  }
-
-  return response.json();
+function mergeContent(data = {}) {
+  return {
+    ...defaultContent,
+    ...data,
+    languages: {
+      ...defaultContent.languages,
+      ...(data.languages || {})
+    }
+  };
 }
 
-function line(label, value) {
-  return value ? `${label}: ${value}` : '';
+function getEnabledLanguages(content) {
+  return Object.entries(content.languages || {})
+    .filter(([, language]) => language.enabled)
+    .map(([code, language]) => ({ code, ...language }));
 }
 
-function buildMessage(language, config) {
-  const { meeting, settings } = config;
-  const parts = [language.heading, language.message];
+function createDetail(label, value, href = '') {
+  if (!value) return null;
 
-  if (settings.showTalkTitle) {
-    parts.push(line(labels.talkTitle, meeting.talkTitle));
-  }
-
-  parts.push(line(labels.day, meeting.day));
-  parts.push(line(labels.time, meeting.time));
-
-  if (meeting.addressLines?.length) {
-    parts.push(`${labels.address}:\n${meeting.addressLines.join('\n')}`);
-  }
-
-  if (settings.showMap && meeting.mapLink) {
-    parts.push(line(labels.map, meeting.mapLink));
-  }
-
-  if (settings.showZoomDetails) {
-    parts.push(line(labels.zoom, meeting.zoomLink));
-    parts.push(line(labels.meetingId, meeting.meetingId));
-    parts.push(line(labels.passcode, meeting.passcode));
-  }
-
-  return parts.filter(Boolean).join('\n\n');
-}
-
-function createDetail(label, value, link) {
-  if (!value) {
-    return null;
-  }
-
-  const item = document.createElement('div');
-  item.className = 'detail-item';
+  const wrapper = document.createElement('div');
+  wrapper.className = 'detail-item';
 
   const term = document.createElement('dt');
   term.textContent = label;
 
   const description = document.createElement('dd');
-
-  if (link) {
-    const anchor = document.createElement('a');
-    anchor.href = link;
-    anchor.target = '_blank';
-    anchor.rel = 'noopener';
-    anchor.textContent = value;
-    description.append(anchor);
+  if (href) {
+    const link = document.createElement('a');
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = value;
+    description.append(link);
   } else {
     description.textContent = value;
   }
 
-  item.append(term, description);
-  return item;
+  wrapper.append(term, description);
+  return wrapper;
 }
 
-function createDetails(config) {
-  const { meeting, settings } = config;
-  const detailItems = [];
+function getDetails(content, language) {
+  const address = (content.addressLines || []).filter(Boolean).join('\n');
+  const details = [];
 
-  if (settings.showTalkTitle) {
-    detailItems.push(createDetail(labels.talkTitle, meeting.talkTitle));
+  if (content.showTalk) details.push(createDetail(language.talkLabel, language.talkTitle));
+  details.push(createDetail(language.dayLabel, language.dayValue));
+  details.push(createDetail(language.timeLabel, language.timeValue));
+  details.push(createDetail(language.addressLabel, address));
+  if (content.showMap) details.push(createDetail(language.mapLabel, content.mapLink, content.mapLink));
+  if (content.showZoom) {
+    details.push(createDetail(language.zoomLabel, content.zoomLink, content.zoomLink));
+    details.push(createDetail(language.meetingIdLabel, content.meetingId));
+    details.push(createDetail(language.passcodeLabel, content.passcode));
   }
 
-  detailItems.push(createDetail(labels.day, meeting.day));
-  detailItems.push(createDetail(labels.time, meeting.time));
-  detailItems.push(createDetail(labels.address, meeting.addressLines?.join(', ')));
-
-  if (settings.showMap) {
-    detailItems.push(createDetail(labels.map, 'Open map', meeting.mapLink));
-  }
-
-  if (settings.showZoomDetails) {
-    detailItems.push(createDetail(labels.zoom, 'Open Zoom', meeting.zoomLink));
-    detailItems.push(createDetail(labels.meetingId, meeting.meetingId));
-    detailItems.push(createDetail(labels.passcode, meeting.passcode));
-  }
-
-  return detailItems.filter(Boolean);
+  return details.filter(Boolean);
 }
 
-function setStatus(message) {
-  elements.status.textContent = message;
-  window.clearTimeout(setStatus.timeoutId);
-  setStatus.timeoutId = window.setTimeout(() => {
-    elements.status.textContent = '';
-  }, 2500);
+function buildMessage(content, language) {
+  const address = (content.addressLines || []).filter(Boolean).join('\n');
+  const lines = [language.heading, ''];
+
+  if (content.showTalk && language.talkTitle) lines.push(`${language.talkLabel}: ${language.talkTitle}`);
+  if (language.dayValue) lines.push(`${language.dayLabel}: ${language.dayValue}`);
+  if (language.timeValue) lines.push(`${language.timeLabel}: ${language.timeValue}`);
+  if (address) lines.push(`${language.addressLabel}:\n${address}`);
+  if (content.showMap && content.mapLink) lines.push(`${language.mapLabel}: ${content.mapLink}`);
+  if (content.showZoom && content.zoomLink) {
+    lines.push(`${language.zoomLabel}: ${content.zoomLink}`);
+    if (content.meetingId) lines.push(`${language.meetingIdLabel}: ${content.meetingId}`);
+    if (content.passcode) lines.push(`${language.passcodeLabel}: ${content.passcode}`);
+  }
+
+  return lines.filter(Boolean).join('\n');
 }
 
 async function copyText(text) {
@@ -120,96 +102,94 @@ async function copyText(text) {
     return;
   }
 
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', '');
-  textarea.style.position = 'fixed';
-  textarea.style.opacity = '0';
-  document.body.append(textarea);
-  textarea.select();
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.setAttribute('readonly', '');
+  textArea.style.position = 'fixed';
+  textArea.style.opacity = '0';
+  document.body.append(textArea);
+  textArea.select();
   document.execCommand('copy');
-  textarea.remove();
+  textArea.remove();
 }
 
-function setShareLinks(card, language, message) {
-  const encodedMessage = encodeURIComponent(message);
-  const encodedSubject = encodeURIComponent(language.heading);
-
-  card.querySelector('.whatsapp-button').href = `https://wa.me/?text=${encodedMessage}`;
-  card.querySelector('.sms-button').href = `sms:?&body=${encodedMessage}`;
-  card.querySelector('.email-button').href = `mailto:?subject=${encodedSubject}&body=${encodedMessage}`;
+function setStatus(message) {
+  elements.status.textContent = message;
+  window.clearTimeout(setStatus.timeout);
+  setStatus.timeout = window.setTimeout(() => {
+    elements.status.textContent = '';
+  }, 2500);
 }
 
-function renderSummary(config) {
-  elements.summary.replaceChildren();
-
-  const details = document.createElement('dl');
-  details.className = 'summary-grid';
-  details.append(...createDetails(config));
-  elements.summary.append(details);
-}
-
-function renderCards(config) {
+function renderCards(content) {
+  const languages = getEnabledLanguages(content);
   elements.cards.replaceChildren();
 
-  config.languages
-    .filter((language) => language.visible)
-    .forEach((language) => {
-      const card = elements.template.content.firstElementChild.cloneNode(true);
-      const message = buildMessage(language, config);
-
-      card.dir = language.dir || 'ltr';
-      card.lang = language.code;
-      card.querySelector('.language-name').textContent = `${language.name} • ${language.nativeName}`;
-      card.querySelector('.message-heading').textContent = language.heading;
-      card.querySelector('.message-text').textContent = language.message;
-      card.querySelector('.message-details').append(...createDetails(config));
-
-      const copyButton = card.querySelector('.copy-button');
-      copyButton.textContent = labels.copy;
-      copyButton.addEventListener('click', async () => {
-        try {
-          await copyText(message);
-          setStatus(labels.copied);
-        } catch (error) {
-          setStatus(labels.copyFailed);
-        }
-      });
-
-      card.querySelector('.whatsapp-button').textContent = labels.whatsapp;
-      card.querySelector('.sms-button').textContent = labels.sms;
-      card.querySelector('.email-button').textContent = labels.email;
-      card.querySelector('.share-button').textContent = labels.share;
-      setShareLinks(card, language, message);
-
-      const shareButton = card.querySelector('.share-button');
-      shareButton.addEventListener('click', async () => {
-        if (navigator.share) {
-          await navigator.share({ title: language.heading, text: message });
-        } else {
-          await copyText(message);
-          setStatus(labels.copied);
-        }
-      });
-
-      elements.cards.append(card);
-    });
-}
-
-async function init() {
-  try {
-    const config = await loadConfig();
-    labels = config.ui.labels;
-
-    document.title = config.ui.siteTitle;
-    elements.title.textContent = config.ui.siteTitle;
-    elements.intro.textContent = config.ui.intro;
-
-    renderSummary(config);
-    renderCards(config);
-  } catch (error) {
-    elements.intro.textContent = 'Could not load meeting details. Please check config.json.';
+  if (!languages.length) {
+    elements.cards.innerHTML = '<p class="empty-state">No languages are currently selected.</p>';
+    return;
   }
+
+  languages.forEach((language) => {
+    const card = elements.template.content.firstElementChild.cloneNode(true);
+    const message = buildMessage(content, language);
+    const encodedMessage = encodeURIComponent(message);
+
+    card.lang = language.code;
+    card.dir = language.dir || 'ltr';
+    card.querySelector('.language-name').textContent = `${language.name} • ${language.nativeName}`;
+    card.querySelector('.message-heading').textContent = language.heading;
+    card.querySelector('.message-details').append(...getDetails(content, language));
+
+    const copyButton = card.querySelector('.copy-button');
+    copyButton.addEventListener('click', async () => {
+      await copyText(message);
+      setStatus('Copied!');
+    });
+
+    const whatsappButton = card.querySelector('.whatsapp-button');
+    whatsappButton.href = `https://wa.me/?text=${encodedMessage}`;
+
+    const smsButton = card.querySelector('.sms-button');
+    smsButton.href = `sms:?&body=${encodedMessage}`;
+
+    const emailButton = card.querySelector('.email-button');
+    emailButton.href = `mailto:?subject=${encodeURIComponent(language.heading)}&body=${encodedMessage}`;
+
+    const shareButton = card.querySelector('.share-button');
+    shareButton.addEventListener('click', async () => {
+      if (navigator.share) {
+        await navigator.share({ title: language.heading, text: message });
+      } else {
+        await copyText(message);
+        setStatus('Copied!');
+      }
+    });
+
+    elements.cards.append(card);
+  });
 }
 
-init();
+function render(content) {
+  document.title = content.title;
+  elements.title.textContent = content.title;
+  elements.subtitle.textContent = content.subtitle;
+
+  if (content.mainImageUrl) {
+    elements.image.src = content.mainImageUrl;
+    elements.image.alt = content.title;
+    elements.imageWrap.hidden = false;
+  } else {
+    elements.image.removeAttribute('src');
+    elements.imageWrap.hidden = true;
+  }
+
+  renderCards(content);
+}
+
+onSnapshot(siteRef, (snapshot) => {
+  const content = mergeContent(snapshot.exists() ? snapshot.data() : {});
+  render(content);
+}, (error) => {
+  elements.status.textContent = `Could not load meeting details: ${error.message}`;
+});
