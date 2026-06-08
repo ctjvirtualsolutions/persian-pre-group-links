@@ -37,6 +37,10 @@ const elements = {
   subtitle: document.querySelector('#site-subtitle'),
   imageWrap: document.querySelector('#main-image-wrap'),
   image: document.querySelector('#main-image'),
+  dashboardDate: document.querySelector('#dashboard-date'),
+  dashboardTime: document.querySelector('#dashboard-time'),
+  dashboardLocation: document.querySelector('#dashboard-location'),
+  dashboardZoom: document.querySelector('#dashboard-zoom'),
   cards: document.querySelector('#language-cards'),
   status: document.querySelector('#status-message'),
   template: document.querySelector('#language-card-template')
@@ -282,10 +286,36 @@ function renderCards(content) {
   });
 }
 
+
+function setDashboardText(element, value) {
+  if (!element) return;
+  element.textContent = value || 'Not provided';
+}
+
+function renderDashboard(content) {
+  const address = (content.addressLines || []).filter(Boolean).join('\n');
+  const locationParts = [];
+  if (address) locationParts.push(address);
+  if (content.showMap && content.mapLink) locationParts.push(content.mapLink);
+
+  const zoomParts = [];
+  if (content.showZoom) {
+    if (content.zoomLink) zoomParts.push(content.zoomLink);
+    if (content.meetingId) zoomParts.push(`Meeting ID: ${content.meetingId}`);
+    if (content.passcode) zoomParts.push(`Passcode: ${content.passcode}`);
+  }
+
+  setDashboardText(elements.dashboardDate, content.baseDayText || content.baseMeetingDate);
+  setDashboardText(elements.dashboardTime, content.baseBrasiliaTime);
+  setDashboardText(elements.dashboardLocation, locationParts.join('\n'));
+  setDashboardText(elements.dashboardZoom, zoomParts.join('\n'));
+}
+
 function renderContent(content) {
   document.title = content.title;
   elements.title.textContent = content.title;
   elements.subtitle.textContent = content.subtitle;
+  renderDashboard(content);
 
   elements.imageWrap.hidden = !content.mainImageUrl;
   if (content.mainImageUrl) {

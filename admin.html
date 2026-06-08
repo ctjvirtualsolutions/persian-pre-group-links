@@ -37,14 +37,11 @@
 
         <form id="content-form" class="stacked-form">
           <fieldset>
-            <legend>Page content</legend>
+            <legend>Basic page info</legend>
             <div class="form-grid">
               <label>Page title<input name="title" required></label>
               <label>Subtitle<input name="subtitle"></label>
               <label class="wide">Main image URL<input name="mainImageUrl" type="url" placeholder="https://example.com/image.jpg"></label>
-              <label class="checkbox-label"><input type="checkbox" name="showTalk"> Show talk</label>
-              <label class="checkbox-label"><input type="checkbox" name="showMap"> Show map</label>
-              <label class="checkbox-label"><input type="checkbox" name="showZoom"> Show Zoom</label>
             </div>
             <img id="image-preview" class="image-preview" alt="Current main image preview" hidden>
           </fieldset>
@@ -56,6 +53,16 @@
               <label>Base day text<input name="baseDayText" placeholder="Sunday"></label>
               <label>Base Brasília time<input name="baseBrasiliaTime" type="time"></label>
               <label class="wide">Address lines<textarea name="addressLines" rows="4"></textarea></label>
+            </div>
+          </fieldset>
+
+
+          <fieldset>
+            <legend>Links and Zoom details</legend>
+            <div class="form-grid">
+              <label class="checkbox-label"><input type="checkbox" name="showTalk"> Show talk</label>
+              <label class="checkbox-label"><input type="checkbox" name="showMap"> Show map</label>
+              <label class="checkbox-label"><input type="checkbox" name="showZoom"> Show Zoom</label>
               <label>Map link<input name="mapLink" type="url"></label>
               <label>Zoom link<input name="zoomLink" type="url"></label>
               <label>Meeting ID<input name="meetingId"></label>
@@ -69,7 +76,7 @@
           </fieldset>
 
           <fieldset>
-            <legend>Optional custom message cards</legend>
+            <legend>Custom timezone cards</legend>
             <p class="field-help">Custom cards reuse the selected language defaults and convert the base Brasília time to the selected timezone.</p>
             <div id="custom-card-editor" class="custom-card-editor"></div>
           </fieldset>
